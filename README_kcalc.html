@@ -1,0 +1,116 @@
+<a href="software.html">&bull; Software</a>
+<a href="utility_corner.html">&bull; Utility corner</a>
+
+<p>
+
+<h1>KCalc -- a Lua-based expression evaluator and math library</h1> 
+
+Version 8.0, March 2013
+
+<table align="center" width="30%" border="1" cellpadding="5">
+<tr>
+<td>
+Please note that this is a work in progress. Not all the functionality
+of the previous version has yet been ported to version 8. The function
+library is not stable, and new functions are being added.
+</td>
+</tr>
+</table>
+
+<h2>What is this?</h2>
+
+<i>KCalc</i> is an expression evaluator and math library based on the 
+Lua programming language. It is implemented partly in Lua and partly
+in C. <i>KCalc</i> is designed to occupy a place between simple 
+pocket calculator-type applications, and heavyweights like Octave and
+Matlab. Like the heavyweights it has full support for complex numbers,
+and is extensible with scripts (in this case, using the Lua language). 
+Unlike them, it
+consumes less than a megayte of storage and neglibible RAM, and 
+starts up very quickly even on low-powered platforms. 
+<p/>
+<i>KCalc</i> is a console (command-line) application, and should run on
+any platform that can provide a C compiler and a prompt. Versions
+are available for Linux, Cygwin, the native Windows prompt ('DOS box'),
+and for Android (using a terminal emulator). It provides line editing
+and history support via the GNU <i>Ireadline</i> library, on platforms
+that support it (Cygwin and most unix-like environments do; the Windows
+console does not). 
+<p/>
+To use <i>KCalc</i> as a calculator requires no knowledge of Lua 
+programming -- it is completely self-contained. However, to add
+new functionality does require at least a rudimentary understanding of
+Lua.
+<p/>
+KCalc is supplied with a modest function library, providing support
+for basic trigonometry, equation solving, statistical, financial, and
+file-handling operations.
+
+<h2>Building and installation</h2>
+
+There is no automated installer for any platform except KBOX (Android). 
+Installation consists
+of copying the executable <code>kcalc</code> (<code>kcalc.exe</code> on
+Windows) to some convenient directory,
+creating a subdirectory <code>scripts</code> in the same directory, and
+copying the contents of the <code>scripts</code> directory in the 
+source bundle to that subdirectory. <i>KCalc</i> works out the location
+of its <code>scripts</code> directory from the location of its own
+binary.
+<p/>
+For convenience, binary bundles are provided for Windows (DOSBox
+and Cygwin), and Fedora 14 Linux. The Cygwin and Linux bundles can be 
+unpacked (with administrator rights)
+at the root level of the filesystem; no further setup is required.
+The
+Windows bundle is simply an archive that can be unpacked in any convenient
+place. Run the program by invoking <code>kcalc.exe</code> from
+the Windows Explorer, or create a shortcut to it.
+<p/>
+On Unix/Linux systems other than Fedora 14, it will probably be 
+necessary to build 
+and install from source
+-- I don't have time to provide binaries for all the different 
+versions around. In most cases cases, this ought to be no more complicated
+that unpacking the source bundle, and running
+
+<pre>
+$ make build
+</pre>
+
+and then
+
+<pre>
+# make install 
+</pre>
+
+<h2>Downloads</h2>
+
+Please read the installation instructions before downloading.
+<p/>
+
+<a href="kcalc-8.0.tar.gz">Source code bundle for all platforms</a><br/>
+<a href="kcalc-8.0-cygwin-binaries.tar.gz">Binary bundle for Cygwin</a><br/>
+<a href="kcalc-8.0-fedora14-binaries.tar.gz">Binary bundle for Fedora 14</a><br/>
+<a href="kcalc-8.0-win32-binaries.tar.gz">Binary bundle for Windows DOSBox</a><br/>
+<a href="kcalc_0.8.0_kbox.deb">Installer package for KBox (Android)</a><br/>
+See the page for the KBOX project <a href="kbox.html">here</a> for an
+details of the KBOX project for Android devices. 
+
+<h2>Author and legal</h2>
+
+<i>KCalc</i> is maintained by Kevin Boone, and distributed under the terms
+of the GNU Public Licence, v2.0. Essentially, this meams that you may 
+use this software as you wish, at your own risk, provided that the 
+original author continues to be acknowledged.
+<p/>
+Please report bug, etc., using the details on the
+<a href="contact.html">contact page</a>.
+
+<h2>Further information</h2>
+
+<a href="kcalc.man.html">KCalc man page</a><br/>
+<a href="kcalc_faq.html">KCalc FAQ</a><br/>
+<a href="http://www.lua.org/manual/5.2/">Lua 5.2 reference manual</a><br/>
+
+

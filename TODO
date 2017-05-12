@@ -1,0 +1,5 @@
+convert negative and fractional hex
+output log
+luac script files (this is tricky if we're cross-compiling)
+Optionally enable strict output representation (e.g., quote all strings)
+

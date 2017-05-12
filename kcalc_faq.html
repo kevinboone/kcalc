@@ -1,0 +1,408 @@
+<a href="software.html">&bull; Software</a>
+<a href="utility_corner.html">&bull; Utility corner</a>
+
+<p>
+
+<h1>KCalc frequently-asked questions</h1> 
+
+Version 8.0, March 2013
+
+<h2>Insallation and platforms</h2>
+
+<h4>What systems does KCalc run on?</h4>
+
+The main target platforms are Microsoft Windows (with Cygwin) and Android
+(using a terminal emulator). KCalc builds easily on Linux systems and
+probably most other Unix-like platforms, but GNU Octave runs nicely 
+on Linux, and is much more powerful. Octave runs on Windows, but
+tends to be cumbersome and rather slow to start. The binaries
+available on this site will very likely be slightly out of date with
+respect to the source code -- building from source is always preferable,
+if possible. 
+
+<h4>What is the difference between the native Windows version and 
+the Cygwin version?</h4>
+
+The native Windows version of KCalc runs in a console ('DOSBox'). It doesn't
+require Cygwin or any other supporting infrastructure. However, 
+the Windows console is very limited, and this version lacks, among
+other things, line editing and name completion. The Cygwin version
+runs on Windows in the Cygwin terminal, and offers proper line editing
+support. Obviously, it only works on a system with Cygwin installed.
+
+<h4>Is there an automated installer?</h4>
+
+Only for Android, using the <a href="kbox.html">KBOX</a> system. Installation
+is pretty trivial, as <i>KCalc</i> consists of one binary and a bunch
+of scripts. So long as the script directory is in the same place as the 
+binary, the whole bundle can be copied into any convenient directory
+and executed in place.
+
+<h2>Operation and capabilities</h2>
+
+<h4>Does KCalc have a graphical user interface?</h4>
+
+No, and it's not really obvious that a GUI would be of benefit. Entering
+math expressions is fundamentally a process of typing symbols. Lacking
+a GUI, KCalc can easily be ported to different platforms.
+
+<h4>What is the relationship between KCalc and Lua?</h4>
+
+<i>KCalc</i> is essentially a front-end to the Lua (5.2) interpreter,
+optimised for entering math expressions, with a math library implemented
+in Lua. <i>KCalc</i> is extensible in Lua if necessary -- look at the
+supplied math library scripts to see how this might be done.
+
+
+<h4>Does KCalc support matrix math?</h4>
+
+No. I thought this would be straying too far into Matlab territory.
+Anybody who needs to invert a high-rank sparse matrix needs something
+more sophisticated that <i>KCalc</i>.
+
+
+<h4>What is the significance of the exclamation mark (!) in data entry?</h4>
+In interactive mode, if a line starts with an exclamation mark it is
+treated as a statement to be compiled and executed. Otherwise the
+input is treated as an expression to be evaluated, and the result
+displayed. To define a new
+function or variable, you will need to precede your input with an 
+exclamation mark, because such a definition is not an expression. Sometimes
+the exclamation mark is helpful simply to suppress output, when 
+evaluating an expression that has no useful return value 
+(such as <code>dofile(filename)</code>).
+
+<h4>Why does 2+3*4=14, not 20?</h4>
+
+Because any calculator that tells you that 2+3*4 is 20 is broken, and
+many are. <i>KCalc</i>, like all decent calculators, follows the 
+standard rules on order of evaluation, and multiplications (and divisions) 
+are evaluated before additions (and subtractions). 
+
+
+<h4>Which script files are read on startup?</h4>
+
+At startup, <i>KCalc</i> reads <code>kcalc.lua</code> from the
+system script directory, which in turn reads a number of scripts that
+define the built-in functions. The last script read is
+<code>kcalcrc.lua</code>, which is typically in the user script
+directory. This file will not exist by default, but can be
+created using any text editor. 
+Run <code>kcalc -v</code> to find the locations of the
+script directories on your particular system.
+
+<h4>What is the angular unit of measure?</h4>
+
+<i>KCalc</i> provides trig functions for both radians and degrees.
+The versions that work in degrees all have names that end in 'd'.
+So, <code>sin(x)</code> is the sine of <i>x</i> in radians, while
+<code>sind(x)</code> is the sine of <i>x</i> in degrees.
+
+
+<h4>Why is there no built in function for cotangent(x) (or whatever)?</h4>
+
+Adding extra functions makes the program larger and slower to start up.
+In general, <i>KCalc</i> does not provide implementations for functions
+that the user could very easily add, unless they are commonly used.
+If you need a cotagent function, you can easily add it to the
+user startup script, as follows:
+
+<pre class="codeblock">
+function cot(x) return 1 / tan(x) end
+</pre>
+
+I'm willing to consider adding to the basic distribution functions 
+which seems to be commonly needed, but are not particularly easy
+to implement.
+
+<h4>Why is the value of 'last' a string, rather than a number?</h4>
+
+<code>last</code> contains the result of the last evaluation. In general,
+<i>KCalc</i> will try to make <code>last</code> a number, so it can be
+used directly in future expressions:
+
+<pre class=codeblock>
+expr&gt; pi/2
+1.5707963267949
+expr&gt; sin(last)
+1
+</pre>
+
+However, sometimes a result cannot be represented as any of the standard
+<i>KCalc</i> data types (number, complex, etc), so it has to be given
+as a string. This leads to problems like the following:
+
+<pre class=codeblock>
+expr&gt; 1/2 + 2/3
+1.16666666666667
+expr&gt; dec2rat(last)
+1+1/6
+expr&gt; 2 * last
+stdin:1: attempt to perform arithmetic on global 'last' (a string value)
+</pre>
+
+The problem here is that <code>dec2rat()</code> produces a string
+that looks like a number, not a number. "1+1/6" evaluates to a number,
+but it isn't actually a number. Other functions, particularly
+those concerned with formatting data, behave the same way.
+<p/>
+The solution to this problem is to pass the value of <code>last</code>
+into <code>eval()</code>, which will evaluate the string as an expression:
+
+<pre class=codeblock>
+expr&gt; 2 * eval(last)
+2.33333333333333
+</pre>
+
+Problems resulting from results having an unexpected type can be
+investigated by setting the variable <code>_kcalc_string</code> to
+<code>true</code>. This will cause <i>KCalc</i> to display strings
+in quotes, so it is more obvious when something is a string, rather
+than a number.
+
+<h2>How do I...?</h2>
+
+<h4>How do I enter complex numbers?</h4>
+Use the format 'real+imag*i', e.g., '2+3*i'. Although <i>KCalc</i>
+will display imaginary numbers without the multiplication sign
+(2+3i), it won't accept this format as input. Note that not all the
+built-in functions can meaningfully operate on complex numbers.
+
+
+<h4>How do I do math with hexadecimal numbers?</h4>
+Any number prefixed with '0x' is treated as hexadecimal. To output
+results in hexadecimal, pass the result to <code>dec2hex()</code>, or use
+<code>!format('hex')</code> to change the display format. 
+
+<h4>How do I get a complete list of functions?</h4>
+
+Enter
+
+<pre class="codeblock">
+expr&gt; help ('functions')
+</pre>
+
+Note that this list only shows <i>KCalc</i> functions. All Lua
+functions are also available -- see the Lua documentation for
+a complex list.
+
+
+<h4>How do I get a complete list of variables?</h4>
+
+Enter
+
+<pre class="codeblock">
+expr&gt; list_vars() 
+</pre>
+
+This function shows only global variables that do
+not begin with an underscore (which are considered to be internal.)
+
+<h4>How do I define a variable in interactive mode?</h4>
+
+Like this:
+
+<pre class="codeblock">
+expr&gt; !myvar=42 
+</pre>
+
+
+<h4>How do I undefine a variable in interactive mode?</h4>
+
+Simply set it to <code>nil</code>
+
+<pre class="codeblock">
+expr&gt; !myvar=nil 
+</pre>
+
+You can remove function definitions the same way.
+
+<h4>How do I define new functions?</h4>
+Use the Lua language syntax. For example, in interactive mode:
+
+<pre class="codeblock">
+expr&gt; !function sqr(x) return x*x end
+expr&gt; sqr(4)
+16
+</pre>
+
+Such definitions only last for the session; to make a function (or
+variable) definition persistent, store it in a file, and load the
+file using <code>!dofile("filename")</code>. Alternatively, add
+the definition to the <i>KCalc</i> startup script. 
+
+<h4>How do I give my new functions 'help' entries?</h4>
+
+Add your explanatory text to the Lua table <code>kcalc_help</code>: 
+
+<pre class="codeblock">
+kcalc_help["myfunction"] = "myfunction(x,y) -- do something\n\n".. 
+  "Blah blah blah..."
+</pre>
+
+This can be done in any script file -- probably in the same place you
+defined the function. The first line of the text is expected to be a 
+brief summary -- this is display by the <code>apropos()</code> function.
+Note that the text is not formatted when it is displayed by <i>KCalc</i>;
+line breaks will appear exactly where you put them.
+
+
+<h4>How do I pass a function to another function?</h4>
+
+Some <i>KCalc</i> functions (equation solving, numerical integration, etc.)
+require as an argument a function to be evaluated. Lua does not support
+a concise method of representing lambda functions, which would be ideal 
+here. There are two alternative approaches.
+First, you can pass the name of any function that takes a single 
+value and returns a value. This function can be anything that is valid in
+the Lua language. Here is how to use this method to find a solution
+for <i>x</i> of the equation <i>sin(x)-2cos(x)=0</i>
+
+<pre class="codeblock">
+expr&gt; !function f(x) return sin(x) - 2*cos(x) end
+expr&gt; solve_secant (f, 0, 2)
+1.10714761402071
+</pre>
+
+The name of the function is irrelevant, so long as it is consistently used.
+<p/>
+An alternative approach is to supply an expression in <i>x</i> in the form 
+of a string:
+
+<pre class="codeblock">
+expr&gt; solve_secant ("sin(x) - 2 * cos(x)", 0, 2)
+1.10714761402071
+</pre>
+
+In this method, the independent variable <i>must</i> be referred to as 'x'.
+This technique for representing a function is more compact, and does not
+require remembering how to define a function in Lua syntax. However, it
+is quite limited -- you can't, for example, create a function this
+way that has its own local variables. 
+
+
+<h4>How do I change the precision with which numbers are displayed?</h4>
+
+Enter
+
+<pre class="codeblock">
+expr&gt; format ('shortG')
+</pre>
+
+or some other format code. <code>help('format')</code> will give a list.
+
+<h4>How do I read a large number of values from a file?</h4>
+
+The function <code>read_csv()</code> will read comma-separated values
+into a one-dimensional array.
+This function also works when the file is formatted one value to a line. 
+However,
+Lua has built-in methods for processing files. You could alternatively
+create a file with the following format:
+
+<pre class="codeblock">
+mydata={1,99,42,6,...}
+</pre>
+
+and then exectute the file using <code>loadfile()</code>:
+
+
+<pre class="codeblock">
+expr&gt; !f=loadfile('filename')
+expr&gt; f() 
+</pre>
+
+This would cause the global variable <code>mydata</code> to be defined
+with the specified values.
+
+
+<h4>How do I raise one number to the power of another?</h4>
+The <i>KCalc</i> notation for this is '^'. 
+Many applications use a different symbol, e.g., '**'.
+
+<pre class="codeblock">
+expr&gt; 2^4 
+16
+</pre>
+
+
+<h4>How to I do calculations with fractions (keeping the results as fractions)?</h4>
+
+<i>KCalc</i> doesn't have an exact fraction mode -- all computations are
+done with floating-point math. However, if you select 'rat' (rational)
+format, <i>KCalc</i> will attempt to display results as simple
+fractions. In many cases, this works just as well -- particularly if you
+know that the answer is representable as a simple fraction. For example:
+
+<pre class="codeblock">
+expr&gt; !format('rat')
+expr&gt; 1/2+2/7
+11/14
+expr&gt; 23/25 / 2/3
+23/150
+</pre>
+
+The procedure used is an approximation, however, as can be seen from
+the following:
+
+<pre class="codeblock">
+expr&gt; pi
+3+16/113
+</pre>
+
+<i>pi</i> is pretty close to 3 16/133, but of course it's not exact.
+That <i>KCalc</i> will approximate irrational numbers as fractions 
+is sometimes useful, but can be misleading.
+
+<h4>How to I do calculations at the prompt, without entering an
+interactive session?</h4>
+
+<i>KCalc</i> will evaluate its command-line arguments as an expression.
+This can be useful for quick calculations, or for use in scripts where
+you need more math than the shell can provide.
+<p/>
+For example:
+
+<pre class="codeblock">
+$ kcalc 254*27
+6858
+</pre>
+
+It doesn't matter whether the expression is given as a single argument,
+or spread over several arguments separated by spaces -- the arguments
+are all concatenated together internally anyway
+<p/>
+Problems can arise, however, when the expression contains symbols that
+have a meaning to the shell -- particularly parentheses. In such cases,
+it's usually possible to overcome the problem by quoting:
+
+<pre class="codeblock"/>
+$ kcalc "sin(2*pi/3)"
+0.866025403784439
+</pre>
+
+
+
+<h2>Miscellaneous</h2>
+
+<h4>Why does read_csv() say "Invalid data item... function: 0x..."?</h4>
+
+Most likely you've entered a string value without enclosing it in quotes.
+All data items read from the file by <code>read_csv()</code> must be
+valid <i>KCalc</i> expressions (or just numbers). Text outside of
+quotes must evaluate to a <i>KCalc</i> data item that is already 
+defined (so <code>pi</code>, for example, would be fine). Otherwise
+Lua treats the text as a function pointer.
+
+<h4>Why is sin(pi) not exactly zero?</h4>
+In the default ('longG') formatting mode, 
+<code>sin(pi)</code> is probably <code>1.22464679914735E-16</code> -- a number
+very close to zero, but not exactly zero. The reason for this is
+that <code>pi</code> does not have an exact representation in the 
+floating-point number system that most computers use, and so the result
+is an approximation. It would be possible to adjust the value to
+zero in the specific case of the argument to <code>sin()</code> being
+exactly <code>pi</code>, but this would not help where the argument
+was a multiple of <code>pi</code>. Irritating as it sometimes is,
+this behaviour is seen with Matlab and Octave as well.
+
