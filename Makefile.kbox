@@ -1,4 +1,0 @@
-CC=/home/kevin/lib/android-9-toolchain_2/bin/arm-linux-androideabi-gcc
-
-all:
-	CC=$(CC) make -f Makefile all linbuild
