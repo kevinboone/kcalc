@@ -1,0 +1,353 @@
+.\" Copyright (C) 2004-2023 Kevin Boone 
+.\" Permission is granted to any individual or institution to use, copy, or
+.\" redistribute this software so long as all of the original files are
+.\" included, that it is not sold for profit, and that this copyright notice
+.\" is retained.
+.\"
+.TH kcalc 1 "February 2023"
+.SH NAME
+KCalc 9.0 \- a Lua-based command-line calculator 
+.SH SYNOPSIS
+.B kcalc
+.RB [options]\ [expression] 
+.PP
+
+.SH DESCRIPTION
+
+\fIKCalc\fR is a command-line expression evaluator and math library based on
+the Lua programming language. It is designed to occupy a place between simple
+pocket calculator-type applications, and heavyweights like Octave and Matlab.
+Like the heavyweights it has full support for complex numbers, and is
+extensible with scripts (in this case, using the Lua language).  Unlike them,
+it consumes less than a megayte of storage and neglibible RAM.
+
+
+.SH OVERVIEW OF OPERATION
+
+When invoked without arguments, \fBkcalc\fR enters interactive mode. 
+Expressions or statements are read from standard input, evaluated, and
+results displayed, if any. If invoked with arguments, the arguments
+are concatenated and treated as an expression. Care needs to be taken
+when entering an expression this way, as some symbols that commonly 
+appear in expressions (particularly parentheses) have a meaning to
+the shell. 
+
+Statements are preceded by an exclamation mark (!); any other input is
+interpreted as an expression.  See the section SYNTAX below for more details of
+the input format.
+
+\fIKCalc\fR will read from standard input until it either gets a complete
+statement or a complete expression, or the syntax is so broken that it cannot
+be corrected by further input. In interactive mode, the prompt will change to
+show '...' when further input is expected. When taking input from a source that
+is not a terminal/console (redirected from a file, for example), no prompt is
+shown, but the input data will still be interpreted the same way.  For example,
+the input
+
+.nf
+!x=1
+2*x
+.fi
+
+sets \fBx\fR to 1 and then evalutes \fI2*x\fR. The same result is 
+obtained if the input is: 
+
+.nf
+!x=
+1
+2*
+x
+.fi
+
+In particular, you don't need to repeat the ! symbol when continuing a
+statement, whether the input is from a terminal/console or some
+other source. 
+
+On systems that support GNU readline, \fIKCalc\fR will attempt to complete
+a function name when the Tab key is pressed. The list of possible completions
+is taken from functions which have \fIhelp()\fR entries, and a few
+other things (\fIlast\fR, \fIquit\fR, etc). variables and constants are
+not considered as possible completions unless they also have help
+entries.
+
+
+.SH GETTING HELP 
+
+In interactive mode, enter '\fIhelp()\fR' to get more 
+information. To get information about a specific function, enter
+\fIhelp('{function_name}')\fR. There are other topics for which
+in-program help is available; \fIhelp()\fR on its own will show a 
+list. 
+
+
+.SH SYNTAX 
+
+Input must be a mathematical expression, valid in the Lua language,
+or a Lua statement preceded with a ! character. There are a few
+exceptions, allowed for convenience: the string 'help' displays
+brief help, and 'quit' exits the program. Lua expressions follow
+ordinary algebraic notation, so the syntax should not produce any 
+surprises. Any input that is not preceded by ! will display a value,
+although that value might be \fInil\fR if the expression does not
+produce a result. An expression that is not expected to produce a
+result can be preceded by a ! simply to suppress the 'nil' message.
+Input that is a statement, rather than an expression, \fImust\fR be
+preceded by a ! -- it is an error not to do so. Statements include,
+for example, variable definitions:
+
+.nf 
+expr> !p4=pi/4
+expr> tan(p4)
+1
+.fi     
+
+Numbers are assumed to be decimal, unless they are prefixed with '0x', 
+to indicate a hexadecimal value. Scientific notation can be used to enter
+small or large values, e.g.: 1.2e4, 12.3E-4. 
+
+Complex numbers should be entered in the form 'x + y*i'. That is,
+although \fIKCalc\fR will display complex numbers in the form
+ 'x+yi', an explicit multiplication by 'i' needs to be used to
+enter complex numbers.
+
+The implicit variable \fIlast\fR can be used in any expression to
+refer to the result of the last computation.
+
+Some built-in functions take arrays as arguments. Arrays are
+defined using curly brackets; for example:
+
+.nf 
+expr> max({1,2,3}) 
+3
+.fi     
+
+The size of array \fIary\fR can be obtained using the construct
+\fI#ary\fR; as in Lua, arrays are indexed from 1, not from 0.
+
+Arrays are also used to represent vectors; see the VECTORS section
+for more details.
+
+.SH STARTUP
+
+At startup, \fIKCalc\fR reads a number of scripts. These are either in
+the system script directory or the user script directory. In particular,
+it reads the script \fIkcalcrc.lua\fR, if it exists, from the
+user script directory. This is the place to add user-specific 
+customizations to \fIKCalc\fR, or simply to set up preferences for
+things like number formatting.
+
+The locations of the script directory vary from platform to platform.
+Run \fIkcalc -v\fR to display them.
+
+
+.SH DISPLAY FORMAT 
+
+The function \fIformat(string)\fR controls how the results of a calculation
+are displayed. \fIstring\fR is one of a set of tags that are broadly
+similar to those used in Matlab: short, long, shortE, longE, shortG,
+longG, bank, rat, and hex. Not all kinds of result can be displayed
+in all formats, and \fIkcalc\fR displays an error message in such cases,
+rather than a result in a different format, which might be confusing.
+For example, 'hex' mode can only display real, positive numbers.
+
+To get a complete list of formats, run \fIhelp('format')\fR/
+
+.SS Strict display mode
+
+In general, the results output by \fIKCalc\fR cannot be assumed to
+be suitable for input in further expressions. If the result is a 
+string, for example, it would need to be enclosed in quotes to be
+used in a subsequent expression. In general, the output format attempts
+to be compact, so we see '2i' rather than '2*i', even though '2*i' is 
+a valid expression and '2i' is not. 
+
+Defining the variable \fI_kcalc_strict=true\fR will make \fIKCalc\fR
+attempt to output data in a form suitable for direct use in 
+another expression.
+
+.SS Rational approximation
+
+In 'rational' mode (\fIformat('rat')\fR) \fIkcalc\fR will try to
+display output as the fraction with the smallest denominator whose
+value is within a certain tolerance of the result. The default 
+tolerance is about 3 significant figures. Because the algorithm looks
+for the smallest denominator rather than the closest tolerance, the 
+result can be unexpected. For example, 0.001 is rendered as
+ '1/991', because 991 is the smallest denominator that satisfies the
+tolerance requirement. Obviously, '1/1000' would be better, but
+the algorithm won't continue once it's found a match. In many cases, 
+the algorithm produces the expected result, and quite quickly; but
+if greater control is required of the output, consider using the
+\fIdec2rat\fR function explicitly. Note that 'rat' mode does work with
+complex numbers, but the results will often look rather ugly and
+confusing.
+
+
+.SH "COMMAND-LINE OPTIONS"
+.TP
+.BI -i
+Continue to enter interactive mode, even in situations where 
+\fIKCalc\fR would normally stop (for example, an expression was
+specified on the command line).
+.LP
+.TP
+.BI -s\ {file}
+Runs the specified Lua script. Note that the file specified is 
+interpreted as a raw Lua script, not the input form that \fIKCalc\fR
+uses for interactive mode. That is, statements don't need to be
+preceded with !, and output should be produced using \fIprint()\fR.
+Once the script has been executed, \fIKCalc\fR will stop, unless
+forced to continue by the \fB-i\fR switch.
+.LP
+.TP
+.BI -v
+Display the version infomation, and some configuration details
+such as the locations of the script directories. 
+.LP
+.TP
+.BI -w\ {cols}
+Sets the display width. Long output, such as the help text associated with
+particular functions, will be split up at word boundaries to fit the screen.
+If no width is set, \fIKCalc\fR will try to work out the screen width, and
+default to 80 characters if it can't. If output is not to a TTY device, then
+the width can still be set. In this case, however, text is not broken at
+all if no width is set.
+
+Note that this formatting only applies to string data; numbers, tables, 
+etc., will always be output on one line.
+.LP
+
+.SH MODULES
+
+\fIKCalc\fR is supplied with a basic library of trigonometric, root-finding,
+financial, and statistical functions. 
+Functionality can be extended easily by defining
+new functions in the Lua programming language.
+
+Unlike previous versions, \fBKCalc\fR v9.0 only loads a subset of the math
+library at start-up. This is to make start-up faster on slow systems. Additional
+modules can be loaded using \fB!import('module')\fR. 
+
+Note that \fB!import()\fR behaves exactly like the Lua function
+\fBrequire()\fR, except that it carries out some additional, internal
+refresh operations. For example, newly-added function names are added
+to the list of auto-completion candidates. 
+
+To get a list of installed modules, use \fBhelp('modules')\fR 
+
+New modules can be added in the system or user script directories. A
+module must have a filename that ends in '.lua', and begin with a
+specific comment that identifies it. The module will probably add
+specific help text for its functions. Any of the predefined modules
+can be used as a template for new ones.
+
+.SH DATA FROM FILES
+
+\fBKCalc()\fR can read and write values from external files, which can
+be particularly helpful for statistical calculations. If you need to
+use a file for data, it is assumed that there are multiple data items, so
+they are always read into an array.
+
+The function \fBread_csv('file')\fR (from the \fBfile\fR module) 
+reads values from the file, all on one line, separated by commas,
+and appends them to an array, which is returned. 
+Values can themselves be arrays, which must be enclosed in {} brackets.
+
+Alternatively, the data can just be expressed as a Lua source file. For
+example, if the file \fBx.dat\fR contains the text
+
+x = {1,2,3}
+
+then it can be read, and the array 'x' assigned, by running
+
+\fB!dofile ('x.dat')\fR 
+
+The function \fBwrite_csv ('file', array)\fR writes the values of the
+array in a suitable format for reading back using  \fBread_csv()\fR .
+
+The function \fBwrite_csv2 ('file', array)\fR writes the array with
+one element per line. If the elements themselves are arrays, then they
+are expanded on the same line and separated by commas. This 
+"two-dimensional" format should be suitable for writing a two-dimentional
+array (array of arrays) in such a way that it can be read by a 
+spreadsheet program.
+
+.SH VECTORS
+
+\fIKCalc\fR has a \fBvector\fR module that provides basic operations on
+vectors, such as the dot product. Vectors are represented as Lua
+arrays. Vector elements can be complex numbers, if required.
+
+.SH TECHNICAL NOTES
+
+.SS Precision
+
+All arithmetic is done with whatever standard double-precision 
+floating-point value is provided by the C compiler. On nearly all
+platforms this is a 32-bit value, giving a precision of about
+sixteen significant figures, with a largest value of about 10^308
+and a smallest value of about 10^-323. Because some precision is lost in
+most calculation steps, many functions will not provide even the 
+sixteen-figure precision that the number format offers.
+
+.SS Overflows
+
+Arithmetic overflows are not considered errors; nor are divisions by zero.
+Operations which overflow take the value 'huge', which can be tested. 
+For example 1/0==huge' evaluates to 'true'.
+
+.SS Simplifying input of single-valued functions
+
+Many \fIKCalc\fR functions take a single-valued function as an argument.
+For example, the functions for finding roots do this -- they need
+to have an equation to solve for zero, and the equation 
+is provided as a Lua function. 
+
+The function can be provided as a Lua function, or as a string of text.
+For example, these invocations are equivalent:
+
+expr> solve_secant ("x^2 + 5*x + 6", 0, -100, 1e-10)
+expr> solve_secant (function(x) return x^2 + 5*x + 6 end, 0, -100, 1e-7)
+
+Both find the value of \fBx\fR that satisfies \fIx^2+5x+6=0\fR in the 
+range 0 - -100, with a result correct to the seventh decimal place.
+The difference is primarily one of speed: the Lua function in the 
+second example only needs to be compiled once, whereas the string in the
+first example is compiled on each iteration of the solver. On modern
+computers, this difference is unlikely to be significant. 
+
+It is important to understand, however, that the string representation
+assumes that the independent variable is called 'x'; nothing else will
+work. The Lua function does not have this -- albeit minor -- limitation.
+
+Another way to work with single-valued functions is to define them
+in advance, and then use their names:
+
+expr> !function quad(y) return y^2 + 5*y + 6 end
+expr> solve_secant (quad, 0, -100, 1e-7)
+
+.SH BUGS AND LIMITATIONS
+
+Hexadecimal output format only supports positive integers.
+
+There is as yet no support for binary or octal numbers, or abitrary 
+number bases.
+
+The only supported data types, both in interactive mode and in scripts, are
+floating-point numbers (which may be complex), strings, and arrays of the same
+(which are actually Lua tables).  In particular, there is no integer data type.
+As a result, care must be taken when testing whether two values are exactly
+equal.
+
+.SH AUTHOR AND LEGAL
+\fIKCalc\fR
+is maintained by Kevin Boone, and is open source under the
+terms of the GNU Public Licence, version 3.0. There is no warranty
+of any kind.
+
+.SH FURTHER INFORMATION 
+For full details of Lua syntax and functions, see:
+http://www.lua.org/manual/5.2/manual.html
+
+
+.\" end of file

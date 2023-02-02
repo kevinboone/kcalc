@@ -1,0 +1,456 @@
+
+<HTML><HEAD><TITLE>Manpage of kcalc</TITLE>
+</HEAD><BODY>
+<H1>kcalc</H1>
+Section: User Commands  (1)<BR>Updated: February 2023<BR><A HREF="#index">Index</A>
+<A HREF="/man/man2html">Return to Main Contents</A><HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+KCalc 9.0 - a Lua-based command-line calculator 
+<A NAME="lbAC">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>kcalc</B>
+
+[options]&nbsp;[expression]
+
+<P>
+
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<P>
+<I>KCalc</I> is a command-line expression evaluator and math library based on
+the Lua programming language. It is designed to occupy a place between simple
+pocket calculator-type applications, and heavyweights like Octave and Matlab.
+Like the heavyweights it has full support for complex numbers, and is
+extensible with scripts (in this case, using the Lua language).  Unlike them,
+it consumes less than a megayte of storage and neglibible RAM.
+<P>
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>OVERVIEW OF OPERATION</H2>
+
+<P>
+When invoked without arguments, <B>kcalc</B> enters interactive mode. 
+Expressions or statements are read from standard input, evaluated, and
+results displayed, if any. If invoked with arguments, the arguments
+are concatenated and treated as an expression. Care needs to be taken
+when entering an expression this way, as some symbols that commonly 
+appear in expressions (particularly parentheses) have a meaning to
+the shell. 
+<P>
+Statements are preceded by an exclamation mark (!); any other input is
+interpreted as an expression.  See the section SYNTAX below for more details of
+the input format.
+<P>
+<I>KCalc</I> will read from standard input until it either gets a complete
+statement or a complete expression, or the syntax is so broken that it cannot
+be corrected by further input. In interactive mode, the prompt will change to
+show '...' when further input is expected. When taking input from a source that
+is not a terminal/console (redirected from a file, for example), no prompt is
+shown, but the input data will still be interpreted the same way.  For example,
+the input
+<P>
+<PRE>
+!x=1
+2*x
+</PRE>
+
+<P>
+sets <B>x</B> to 1 and then evalutes <I>2*x</I>. The same result is 
+obtained if the input is: 
+<P>
+<PRE>
+!x=
+1
+2*
+x
+</PRE>
+
+<P>
+In particular, you don't need to repeat the ! symbol when continuing a
+statement, whether the input is from a terminal/console or some
+other source. 
+<P>
+On systems that support GNU readline, <I>KCalc</I> will attempt to complete
+a function name when the Tab key is pressed. The list of possible completions
+is taken from functions which have <I>help()</I> entries, and a few
+other things (<I>last</I>, <I>quit</I>, etc). variables and constants are
+not considered as possible completions unless they also have help
+entries.
+<P>
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>GETTING HELP </H2>
+
+<P>
+In interactive mode, enter '<I>help()</I>' to get more 
+information. To get information about a specific function, enter
+<I>help('{function_name}')</I>. There are other topics for which
+in-program help is available; <I>help()</I> on its own will show a 
+list. 
+<P>
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>SYNTAX </H2>
+
+<P>
+Input must be a mathematical expression, valid in the Lua language,
+or a Lua statement preceded with a ! character. There are a few
+exceptions, allowed for convenience: the string 'help' displays
+brief help, and 'quit' exits the program. Lua expressions follow
+ordinary algebraic notation, so the syntax should not produce any 
+surprises. Any input that is not preceded by ! will display a value,
+although that value might be <I>nil</I> if the expression does not
+produce a result. An expression that is not expected to produce a
+result can be preceded by a ! simply to suppress the 'nil' message.
+Input that is a statement, rather than an expression, <I>must</I> be
+preceded by a ! -- it is an error not to do so. Statements include,
+for example, variable definitions:
+<P>
+<PRE>
+expr&gt; !p4=pi/4
+expr&gt; tan(p4)
+1
+</PRE>
+
+<P>
+Numbers are assumed to be decimal, unless they are prefixed with '0x', 
+to indicate a hexadecimal value. Scientific notation can be used to enter
+small or large values, e.g.: 1.2e4, 12.3E-4. 
+<P>
+Complex numbers should be entered in the form 'x + y*i'. That is,
+although <I>KCalc</I> will display complex numbers in the form
+<BR>&nbsp;'x+yi',&nbsp;an&nbsp;explicit&nbsp;multiplication&nbsp;by&nbsp;'i'&nbsp;needs&nbsp;to&nbsp;be&nbsp;used&nbsp;to
+enter complex numbers.
+<P>
+The implicit variable <I>last</I> can be used in any expression to
+refer to the result of the last computation.
+<P>
+Some built-in functions take arrays as arguments. Arrays are
+defined using curly brackets; for example:
+<P>
+<PRE>
+expr&gt; max({1,2,3}) 
+3
+</PRE>
+
+<P>
+The size of array <I>ary</I> can be obtained using the construct
+<I>#ary</I>; as in Lua, arrays are indexed from 1, not from 0.
+<P>
+Arrays are also used to represent vectors; see the VECTORS section
+for more details.
+<P>
+<A NAME="lbAH">&nbsp;</A>
+<H2>STARTUP</H2>
+
+<P>
+At startup, <I>KCalc</I> reads a number of scripts. These are either in
+the system script directory or the user script directory. In particular,
+it reads the script <I>kcalcrc.lua</I>, if it exists, from the
+user script directory. This is the place to add user-specific 
+customizations to <I>KCalc</I>, or simply to set up preferences for
+things like number formatting.
+<P>
+The locations of the script directory vary from platform to platform.
+Run <I>kcalc -v</I> to display them.
+<P>
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>DISPLAY FORMAT </H2>
+
+<P>
+The function <I>format(string)</I> controls how the results of a calculation
+are displayed. <I>string</I> is one of a set of tags that are broadly
+similar to those used in Matlab: short, long, shortE, longE, shortG,
+longG, bank, rat, and hex. Not all kinds of result can be displayed
+in all formats, and <I>kcalc</I> displays an error message in such cases,
+rather than a result in a different format, which might be confusing.
+For example, 'hex' mode can only display real, positive numbers.
+<P>
+To get a complete list of formats, run <I>help('format')</I>/
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H3>Strict display mode</H3>
+
+<P>
+In general, the results output by <I>KCalc</I> cannot be assumed to
+be suitable for input in further expressions. If the result is a 
+string, for example, it would need to be enclosed in quotes to be
+used in a subsequent expression. In general, the output format attempts
+to be compact, so we see '2i' rather than '2*i', even though '2*i' is 
+a valid expression and '2i' is not. 
+<P>
+Defining the variable <I>_kcalc_strict=true</I> will make <I>KCalc</I>
+attempt to output data in a form suitable for direct use in 
+another expression.
+<P>
+<A NAME="lbAK">&nbsp;</A>
+<H3>Rational approximation</H3>
+
+<P>
+In 'rational' mode (<I>format('rat')</I>) <I>kcalc</I> will try to
+display output as the fraction with the smallest denominator whose
+value is within a certain tolerance of the result. The default 
+tolerance is about 3 significant figures. Because the algorithm looks
+for the smallest denominator rather than the closest tolerance, the 
+result can be unexpected. For example, 0.001 is rendered as
+<BR>&nbsp;'1/991',&nbsp;because&nbsp;991&nbsp;is&nbsp;the&nbsp;smallest&nbsp;denominator&nbsp;that&nbsp;satisfies&nbsp;the
+tolerance requirement. Obviously, '1/1000' would be better, but
+the algorithm won't continue once it's found a match. In many cases, 
+the algorithm produces the expected result, and quite quickly; but
+if greater control is required of the output, consider using the
+<I>dec2rat</I> function explicitly. Note that 'rat' mode does work with
+complex numbers, but the results will often look rather ugly and
+confusing.
+<P>
+<P>
+<A NAME="lbAL">&nbsp;</A>
+<H2>COMMAND-LINE OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-i</B>
+
+<DD>
+Continue to enter interactive mode, even in situations where 
+<I>KCalc</I> would normally stop (for example, an expression was
+specified on the command line).
+</DL>
+<P>
+
+<DL COMPACT>
+<DT><B>-s&nbsp;{file}</B>
+
+<DD>
+Runs the specified Lua script. Note that the file specified is 
+interpreted as a raw Lua script, not the input form that <I>KCalc</I>
+uses for interactive mode. That is, statements don't need to be
+preceded with !, and output should be produced using <I>print()</I>.
+Once the script has been executed, <I>KCalc</I> will stop, unless
+forced to continue by the <B>-i</B> switch.
+</DL>
+<P>
+
+<DL COMPACT>
+<DT><B>-v</B>
+
+<DD>
+Display the version infomation, and some configuration details
+such as the locations of the script directories. 
+</DL>
+<P>
+
+<DL COMPACT>
+<DT><B>-w&nbsp;{cols}</B>
+
+<DD>
+Sets the display width. Long output, such as the help text associated with
+particular functions, will be split up at word boundaries to fit the screen.
+If no width is set, <I>KCalc</I> will try to work out the screen width, and
+default to 80 characters if it can't. If output is not to a TTY device, then
+the width can still be set. In this case, however, text is not broken at
+all if no width is set.
+<P>
+Note that this formatting only applies to string data; numbers, tables, 
+etc., will always be output on one line.
+</DL>
+<P>
+
+<P>
+<A NAME="lbAM">&nbsp;</A>
+<H2>MODULES</H2>
+
+<P>
+<I>KCalc</I> is supplied with a basic library of trigonometric, root-finding,
+financial, and statistical functions. 
+Functionality can be extended easily by defining
+new functions in the Lua programming language.
+<P>
+Unlike previous versions, <B>KCalc</B> v9.0 only loads a subset of the math
+library at start-up. This is to make start-up faster on slow systems. Additional
+modules can be loaded using <B>!import('module')</B>. 
+<P>
+Note that <B>!import()</B> behaves exactly like the Lua function
+<B>require()</B>, except that it carries out some additional, internal
+refresh operations. For example, newly-added function names are added
+to the list of auto-completion candidates. 
+<P>
+To get a list of installed modules, use <B>help('modules')</B> 
+<P>
+New modules can be added in the system or user script directories. A
+module must have a filename that ends in '.lua', and begin with a
+specific comment that identifies it. The module will probably add
+specific help text for its functions. Any of the predefined modules
+can be used as a template for new ones.
+<P>
+<A NAME="lbAN">&nbsp;</A>
+<H2>DATA FROM FILES</H2>
+
+<P>
+<B>KCalc()</B> can read and write values from external files, which can
+be particularly helpful for statistical calculations. If you need to
+use a file for data, it is assumed that there are multiple data items, so
+they are always read into an array.
+<P>
+The function <B>read_csv('file')</B> (from the <B>file</B> module) 
+reads values from the file, all on one line, separated by commas,
+and appends them to an array, which is returned. 
+Values can themselves be arrays, which must be enclosed in {} brackets.
+<P>
+Alternatively, the data can just be expressed as a Lua source file. For
+example, if the file <B>x.dat</B> contains the text
+<P>
+x = {1,2,3}
+<P>
+then it can be read, and the array 'x' assigned, by running
+<P>
+<B>!dofile ('x.dat')</B> 
+<P>
+The function <B>write_csv ('file', array)</B> writes the values of the
+array in a suitable format for reading back using  <B>read_csv()</B> .
+<P>
+The function <B>write_csv2 ('file', array)</B> writes the array with
+one element per line. If the elements themselves are arrays, then they
+are expanded on the same line and separated by commas. This 
+&quot;two-dimensional&quot; format should be suitable for writing a two-dimentional
+array (array of arrays) in such a way that it can be read by a 
+spreadsheet program.
+<P>
+<A NAME="lbAO">&nbsp;</A>
+<H2>VECTORS</H2>
+
+<P>
+<I>KCalc</I> has a <B>vector</B> module that provides basic operations on
+vectors, such as the dot product. Vectors are represented as Lua
+arrays. Vector elements can be complex numbers, if required.
+<P>
+<A NAME="lbAP">&nbsp;</A>
+<H2>TECHNICAL NOTES</H2>
+
+<P>
+<A NAME="lbAQ">&nbsp;</A>
+<H3>Precision</H3>
+
+<P>
+All arithmetic is done with whatever standard double-precision 
+floating-point value is provided by the C compiler. On nearly all
+platforms this is a 32-bit value, giving a precision of about
+sixteen significant figures, with a largest value of about 10^308
+and a smallest value of about 10^-323. Because some precision is lost in
+most calculation steps, many functions will not provide even the 
+sixteen-figure precision that the number format offers.
+<P>
+<A NAME="lbAR">&nbsp;</A>
+<H3>Overflows</H3>
+
+<P>
+Arithmetic overflows are not considered errors; nor are divisions by zero.
+Operations which overflow take the value 'huge', which can be tested. 
+For example 1/0==huge' evaluates to 'true'.
+<P>
+<A NAME="lbAS">&nbsp;</A>
+<H3>Simplifying input of single-valued functions</H3>
+
+<P>
+Many <I>KCalc</I> functions take a single-valued function as an argument.
+For example, the functions for finding roots do this -- they need
+to have an equation to solve for zero, and the equation 
+is provided as a Lua function. 
+<P>
+The function can be provided as a Lua function, or as a string of text.
+For example, these invocations are equivalent:
+<P>
+expr&gt; solve_secant (&quot;x^2 + 5*x + 6&quot;, 0, -100, 1e-10)
+expr&gt; solve_secant (function(x) return x^2 + 5*x + 6 end, 0, -100, 1e-7)
+<P>
+Both find the value of <B>x</B> that satisfies <I>x^2+5x+6=0</I> in the 
+range 0 - -100, with a result correct to the seventh decimal place.
+The difference is primarily one of speed: the Lua function in the 
+second example only needs to be compiled once, whereas the string in the
+first example is compiled on each iteration of the solver. On modern
+computers, this difference is unlikely to be significant. 
+<P>
+It is important to understand, however, that the string representation
+assumes that the independent variable is called 'x'; nothing else will
+work. The Lua function does not have this -- albeit minor -- limitation.
+<P>
+Another way to work with single-valued functions is to define them
+in advance, and then use their names:
+<P>
+expr&gt; !function quad(y) return y^2 + 5*y + 6 end
+expr&gt; solve_secant (quad, 0, -100, 1e-7)
+<P>
+<A NAME="lbAT">&nbsp;</A>
+<H2>BUGS AND LIMITATIONS</H2>
+
+<P>
+Hexadecimal output format only supports positive integers.
+<P>
+There is as yet no support for binary or octal numbers, or abitrary 
+number bases.
+<P>
+The only supported data types, both in interactive mode and in scripts, are
+floating-point numbers (which may be complex), strings, and arrays of the same
+(which are actually Lua tables).  In particular, there is no integer data type.
+As a result, care must be taken when testing whether two values are exactly
+equal.
+<P>
+<A NAME="lbAU">&nbsp;</A>
+<H2>AUTHOR AND LEGAL</H2>
+
+<I>KCalc</I>
+is maintained by Kevin Boone, and is open source under the
+terms of the GNU Public Licence, version 3.0. There is no warranty
+of any kind.
+<P>
+<A NAME="lbAV">&nbsp;</A>
+<H2>FURTHER INFORMATION </H2>
+
+For full details of Lua syntax and functions, see:
+<A HREF="http://www.lua.org/manual/5.2/manual.html">http://www.lua.org/manual/5.2/manual.html</A>
+<P>
+<P>
+
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAD">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAE">OVERVIEW OF OPERATION</A><DD>
+<DT><A HREF="#lbAF">GETTING HELP </A><DD>
+<DT><A HREF="#lbAG">SYNTAX </A><DD>
+<DT><A HREF="#lbAH">STARTUP</A><DD>
+<DT><A HREF="#lbAI">DISPLAY FORMAT </A><DD>
+<DL>
+<DT><A HREF="#lbAJ">Strict display mode</A><DD>
+<DT><A HREF="#lbAK">Rational approximation</A><DD>
+</DL>
+<DT><A HREF="#lbAL">COMMAND-LINE OPTIONS</A><DD>
+<DT><A HREF="#lbAM">MODULES</A><DD>
+<DT><A HREF="#lbAN">DATA FROM FILES</A><DD>
+<DT><A HREF="#lbAO">VECTORS</A><DD>
+<DT><A HREF="#lbAP">TECHNICAL NOTES</A><DD>
+<DL>
+<DT><A HREF="#lbAQ">Precision</A><DD>
+<DT><A HREF="#lbAR">Overflows</A><DD>
+<DT><A HREF="#lbAS">Simplifying input of single-valued functions</A><DD>
+</DL>
+<DT><A HREF="#lbAT">BUGS AND LIMITATIONS</A><DD>
+<DT><A HREF="#lbAU">AUTHOR AND LEGAL</A><DD>
+<DT><A HREF="#lbAV">FURTHER INFORMATION </A><DD>
+</DL>
+<HR>
+This document was created by
+<A HREF="/man/man2html">man2html</A>,
+using the manual pages.<BR>
+Time: 10:20:56 GMT, February 02, 2023
+</BODY>
+</HTML>
