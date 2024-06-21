@@ -261,7 +261,7 @@ char *luaintf_get_module_list_from_dir (const char *dir)
         if (f >= 0)
           {
           char line[256];
-          int n = read (f, line, sizeof (line));
+          read (f, line, sizeof (line));
           line[sizeof(line) - 1] = 0; 
           char *p = strchr (line, '\n');
           if (p) *p = 0;
@@ -300,7 +300,7 @@ void luaintf_refresh_module_list (lua_State *L)
 
   char *s;
   asprintf (&s, 
-     "kcalc_help['modules']=\"%sUse !import(name) to load a module\"", 
+     "kcalc_help['modules']=\"%sUse !import(\\\"name\\\") to load a module\"", 
      list1);
   if (luaL_loadbuffer (L, s, strlen(s), "init"))
     {

@@ -2,6 +2,14 @@
 
 Version 9.0.0, January 2023
 
+<p>
+<b>
+Please note that this program is not connected in any way with the 
+KDE utility of the same name. I've been maintaining 'kcalc' since before
+there was a KDE, and I'm not going to change the name.
+</b>
+</p>
+
 <table align="center" width="30%" border="1" cellpadding="5">
 <tr>
 <td>
@@ -40,11 +48,12 @@ that support it (Cygwin and most unix-like environments do).
 To use <i>KCalc</i> as a calculator requires no knowledge of Lua 
 programming -- it is completely self-contained. However, to add
 new functionality does require at least a rudimentary understanding of
-Lua.
+Lua. To solve complicated math problems really requires an extensive 
+understanding of Lua.
 <p/>
 KCalc is supplied with a modest function library, providing support
 for basic trigonometry, equation solving, statistical, financial, and
-file-handling operations.
+file-handling operations. This can easily be extended.
 
 <h2>Building and installation</h2>
 

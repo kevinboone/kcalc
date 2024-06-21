@@ -1,0 +1,6 @@
+*.o
+lua-5.2.1/src/*.o
+lua-5.2.1/src/luac
+build
+*.swp
+

@@ -6,8 +6,8 @@
 # Your platform. See PLATS for possible values.
 PLAT= none
 
-CFLAGS= -O2 -Wall -DLUA_COMPAT_ALL $(SYSCFLAGS) $(MYCFLAGS) -fpie -fpic
-LDFLAGS= $(SYSLDFLAGS) $(MYLDFLAGS)
+CFLAGS= -O3 -Wall -Wno-unused-result -DLUA_COMPAT_ALL $(SYSCFLAGS) $(EXTRA_CFLAGS) 
+LDFLAGS= $(SYSLDFLAGS) $(EXTRA_LDFLAGS)
 LIBS= -lm $(SYSLIBS) $(MYLIBS)
 
 ifndef CC 
