@@ -1,6 +1,6 @@
 <h1>KCalc -- a Lua-based, console expression evaluator and math library</h1> 
 
-Version 9.0.0, January 2023
+Version 9.0.1, June 2024
 
 <p>
 <b>

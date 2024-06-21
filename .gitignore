@@ -1,6 +1,8 @@
 *.o
 lua-5.2.1/src/*.o
 lua-5.2.1/src/luac
+lua-5.2.1/src/lua
+lua-5.2.1/src/liblua.a
 build
 *.swp
 

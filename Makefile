@@ -1,5 +1,5 @@
 TARGET      := kcalc
-VERSION     := 9.0.0
+VERSION     := 9.0.1
 CC          := gcc
 LUAVERSION  = 5.2.1
 DESTDIR     ?= /
